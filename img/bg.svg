@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200">
+  <!-- 800px streaked-blood tile: texture at the edges, black down the middle -->
+  <filter id="f" x="0" y="0" width="100%" height="100%">
+    <!-- noise stretched sideways into streaks -->
+    <feTurbulence type="fractalNoise" baseFrequency="0.003 0.04" numOctaves="4" seed="13" stitchTiles="stitch"/>
+    <!-- map the noise to blood red, crushing most of it to black -->
+    <feColorMatrix values="2.6 0 0 0 -1.25  0.1 0 0 0 -0.07  0.3 0 0 0 -0.14  0 0 0 0 1"/>
+  </filter>
+  <!-- fade: textured at the edges, black down the middle -->
+  <linearGradient id="g">
+    <stop offset="0" stop-color="#fff"/>
+    <stop offset=".32" stop-color="#000"/>
+    <stop offset=".68" stop-color="#000"/>
+    <stop offset="1" stop-color="#fff"/>
+  </linearGradient>
+  <mask id="m"><rect width="800" height="200" fill="url(#g)"/></mask>
+  <rect width="800" height="200" fill="#000"/>
+  <rect width="800" height="200" filter="url(#f)" mask="url(#m)"/>
+</svg>

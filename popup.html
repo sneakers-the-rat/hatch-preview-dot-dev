@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HA HA ENTER IF YOU DAR E THIS IS THE INTERNET!!!!!</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #000; }
+    canvas { position: fixed; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+    #x {
+      position: fixed;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      font: bold 12px/14px Arial, sans-serif;
+      color: #000;
+      background: #c0c0c0;
+      border: 2px outset #fff;
+      cursor: pointer;
+    }
+    #x:active { border-style: inset; }
+    #x { z-index: 2; }
+    .flip { position: fixed; z-index: 1; image-rendering: pixelated; outline: 1px solid #555; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<button id="x" title="close">x</button>
+<script>
+  // LETS GO BRUTE FORCE MACHINE RENDER ME THOSE LIPS THIS IS A ONE SHOT FIRE DRILL NEVER TO BE MAINTAINED
+  var FRAME_MS = 500;
+  var FRAMES = 4;
+
+  var s = screen;
+  var SW = s.availWidth, SH = s.availHeight;
+  var LW = 240, LH = Math.round(LW * SH / SW);
+
+  var LIGHT = norm([-0.5, 0.7, 0.6]);
+  var HALF = norm([LIGHT[0], LIGHT[1], LIGHT[2] + 1]);
+
+  function norm(v) {
+    var l = Math.hypot(v[0], v[1], v[2]) || 1;
+    return [v[0] / l, v[1] / l, v[2] / l];
+  }
+
+  function quad(a, b, c, d, mat) { return { v: [a, b, c, d], m: mat }; }
+
+  function box(x0, x1, y0, y1, z0, z1, mat) {
+    var p = function (x, y, z) { return [x, y, z]; };
+    return [
+      quad(p(x0, y0, z1), p(x1, y0, z1), p(x1, y1, z1), p(x0, y1, z1), mat),
+      quad(p(x0, y0, z0), p(x0, y1, z0), p(x1, y1, z0), p(x1, y0, z0), mat),
+      quad(p(x0, y1, z0), p(x0, y1, z1), p(x1, y1, z1), p(x1, y1, z0), mat),
+      quad(p(x0, y0, z0), p(x1, y0, z0), p(x1, y0, z1), p(x0, y0, z1), mat),
+      quad(p(x0, y0, z0), p(x0, y0, z1), p(x0, y1, z1), p(x0, y1, z0), mat),
+      quad(p(x1, y0, z0), p(x1, y1, z0), p(x1, y1, z1), p(x1, y0, z1), mat)
+    ];
+  }
+
+  var LIPS = { c: [205, 15, 45], ks: 1, sh: 9 };
+  var TEETH = { c: [250, 250, 235], ks: 0.9, sh: 14, amb: 0.65 };
+  var TONGUE = { c: [235, 95, 130], ks: 0.7, sh: 7 };
+  var THROAT = { c: [55, 0, 10], ks: 0, sh: 1 };
+
+  function mouthMesh(open) {
+    var faces = [], RX = 1, RY = 0.42 * open, NU = 18, NV = 6;
+    function lipPoint(i, j) {
+      var t = i / NU * Math.PI * 2, ph = j / NV * Math.PI * 2;
+      var r = (Math.sin(t) > 0 ? 0.22 : 0.27) * (0.4 + 0.6 * Math.abs(Math.sin(t)));
+      var cx = RX * Math.cos(t), cy = RY * Math.sin(t);
+      if (Math.sin(t) > 0) cy -= 0.09 * Math.exp(-Math.pow(Math.cos(t) / 0.2, 2));
+      return [cx + r * Math.cos(ph) * Math.cos(t), cy + r * Math.cos(ph) * Math.sin(t), r * Math.sin(ph)];
+    }
+    for (var i = 0; i < NU; i++)
+      for (var j = 0; j < NV; j++)
+        faces.push(quad(lipPoint(i, j), lipPoint(i + 1, j), lipPoint(i + 1, j + 1), lipPoint(i, j + 1), LIPS));
+
+    // throat
+    var back = [];
+    for (var k = 0; k < NU; k++) {
+      var a = k / NU * Math.PI * 2;
+      back.push([0.95 * Math.cos(a), (RY + 0.05) * Math.sin(a), -0.15]);
+    }
+    faces.push({ v: back, m: THROAT });
+
+    if (open > 0.4) {
+      var NT = 8, ty = -RY * 0.45, tip = [0, ty, 0.1];
+      for (var n = 0; n < NT; n++) {
+        var a0 = n / NT * Math.PI * 2, a1 = (n + 1) / NT * Math.PI * 2;
+        faces.push({ v: [tip,
+          [0.5 * Math.cos(a0), ty + RY * 0.45 * Math.sin(a0), -0.1],
+          [0.5 * Math.cos(a1), ty + RY * 0.45 * Math.sin(a1), -0.1]], m: TONGUE });
+      }
+      for (var u = -3; u <= 3; u++) {
+        var x = u * 0.17, top = RY * Math.sqrt(1 - x * x) - 0.13;
+        faces.push.apply(faces, box(x - 0.075, x + 0.075, top - 0.18, top, 0, 0.14, TEETH));
+      }
+      for (var d = -2; d <= 2; d++) {
+        var xb = d * 0.18, bot = -RY * Math.sqrt(1 - xb * xb) + 0.14;
+        faces.push.apply(faces, box(xb - 0.07, xb + 0.07, bot, bot + 0.13, 0, 0.12, TEETH));
+      }
+    }
+    return faces;
+  }
+
+  function render(g, faces, cx, cy, size, yaw, pitch) {
+    var cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch), D = 4;
+    var drawn = faces.map(function (f) {
+      var pts = f.v.map(function (p) {
+        var x = p[0] * cyw + p[2] * syw, z = -p[0] * syw + p[2] * cyw;
+        var y = p[1] * cp - z * sp;
+        z = p[1] * sp + z * cp;
+        return [x, y, z];
+      });
+      var a = pts[0], b = pts[1], c = pts[2];
+      var u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+      var n = norm([u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]]);
+      if (n[2] < 0) n = [-n[0], -n[1], -n[2]];
+      var diff = Math.max(0, n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]);
+      var spec = f.m.ks * Math.pow(Math.max(0, n[0] * HALF[0] + n[1] * HALF[1] + n[2] * HALF[2]), f.m.sh);
+      var col = f.m.c.map(function (ch) { var amb = f.m.amb || 0.2;
+        return Math.min(255, Math.round(ch * (amb + (1 - amb) * diff) + 255 * spec)); });
+      var depth = pts.reduce(function (acc, p) { return acc + p[2]; }, 0) / pts.length;
+      return { pts: pts, col: 'rgb(' + col.join() + ')', depth: depth };
+    });
+    drawn.sort(function (p, q) { return p.depth - q.depth; });
+    drawn.forEach(function (f) {
+      g.beginPath();
+      f.pts.forEach(function (p, i) {
+        var k = D / (D - p[2]);
+        var sx = cx + p[0] * k * size, sy = cy - p[1] * k * size;
+        if (i) g.lineTo(sx, sy); else g.moveTo(sx, sy);
+      });
+      g.closePath();
+      g.fillStyle = g.strokeStyle = f.col;
+      g.lineWidth = 0.6;
+      g.fill();
+      g.stroke();
+    });
+  }
+
+  // squash everything onto the 216-colour web-safe palette with a 4x4 Bayer dither
+  var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  function websafe(g, W, H) {
+    var img = g.getImageData(0, 0, W, H), d = img.data;
+    for (var y = 0; y < H; y++)
+      for (var x = 0; x < W; x++) {
+        var t = (BAYER[(y & 3) * 4 + (x & 3)] + 0.5) / 16, i = (y * W + x) * 4;
+        for (var ch = 0; ch < 3; ch++) d[i + ch] = Math.min(5, Math.floor(d[i + ch] / 51 + t)) * 51;
+      }
+    g.putImageData(img, 0, 0);
+  }
+
+  // ---- the scene --------------------------------------------------------------
+
+  function drawScene(g, f, W, H) {
+    var u = H / 100, cx = W / 2;
+
+    g.fillStyle = f === 3 ? '#5a0000' : f % 2 ? '#2a0000' : '#1a0000';
+    g.fillRect(0, 0, W, H);
+
+    [['#900', 16, 0], ['#e40', 9, 2]].forEach(function (layer) {
+      g.fillStyle = layer[0];
+      g.beginPath();
+      g.moveTo(0, H);
+      for (var i = 0, x = 0; x <= W + 8 * u; i++, x += 6 * u) {
+        var peak = (i + f + layer[2]) % 3 === 0 ? 1 : (i * 7 + f * 5) % 4 / 4;
+        g.lineTo(x, H - (layer[1] * 0.4 + layer[1] * peak) * u);
+        g.lineTo(x + 3 * u, H - layer[1] * 0.3 * u);
+      }
+      g.lineTo(W, H);
+      g.fill();
+    });
+
+    var open = [0.35, 1.15, 0.65, 1.4][f];
+    var yaw = [-0.5, -0.15, 0.3, 0.6][f];
+    var pitch = [0.25, 0.05, 0.3, -0.1][f];
+    var bob = [0, -4, 2, -6][f] * u;
+    render(g, mouthMesh(open), cx, 48 * u + bob, Math.min(W * 0.32, 44 * u), yaw, pitch);
+
+    var words = [['HA HA', 0.2, 18], ['HA HA HA', 0.76, 30], ['HA HA', 0.18, 72], ['HA HA HA', 0.7, 84]];
+    var word = words[f];
+    g.font = 'bold ' + Math.round(13 * u) + 'px "Times New Roman", serif';
+    g.textAlign = 'center';
+    g.lineWidth = 2 * u;
+    g.strokeStyle = '#000';
+    g.strokeText(word[0], W * word[1], word[2] * u);
+    g.fillStyle = '#ff0';
+    g.fillText(word[0], W * word[1], word[2] * u);
+
+    websafe(g, W, H);
+  }
+
+  var frames = [];
+  for (var fi = 0; fi < FRAMES; fi++) {
+    var fc = document.createElement('canvas');
+    fc.width = LW;
+    fc.height = LH;
+    drawScene(fc.getContext('2d'), fi, LW, LH);
+    frames.push(fc);
+  }
+
+  var params = new URLSearchParams(location.search);
+  var seed = Number(params.get('seed')) || Math.floor(Math.random() * 2147483647);
+  var t0 = Number(params.get('t0')) || Date.now();
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var rng = mulberry32(seed);
+  function rand(lo, hi) { return lo + rng() * (hi - lo); }
+
+  var GIF_SCALE = Math.max(1, Math.round(SW / 900));
+  var GIFS = [
+    ['Allie_FlipOff.gif', 100, 120], ['attack14.gif', 122, 100], ['teschiodito.gif', 184, 136],
+    ['taz.gif', 201, 132], ['joia.gif', 160, 120], ['alien28.gif', 120, 90],
+    ['dados.gif', 70, 50], ['naofume.gif', 100, 100]
+  ];
+
+  for (var i = GIFS.length - 1; i > 0; i--) {
+    var j = Math.floor(rng() * (i + 1)), tmp = GIFS[i];
+    GIFS[i] = GIFS[j];
+    GIFS[j] = tmp;
+  }
+  var start = 1500;
+  var gifs = GIFS.map(function (gif, n, all) {
+    var w = gif[1] * GIF_SCALE, h = gif[2] * GIF_SCALE, best, bestDist = -1;
+    for (var k = 0; k < 12; k++) {
+      var x = rand(0, Math.max(0, SW - w)), y = rand(0, Math.max(0, SH - h)), d = Infinity;
+      for (var m = 0; m < n; m++) d = Math.min(d, Math.hypot(x + w / 2 - all[m].cx, y + h / 2 - all[m].cy));
+      if (d > bestDist) { bestDist = d; best = [x, y]; }
+    }
+    gif.cx = best[0] + w / 2;
+    gif.cy = best[1] + h / 2;
+
+    // nothing for a while, then drawn top to bottom in fits and starts
+    var steps = [], t = start, unloaded = 100;
+    while (unloaded > 0) {
+      unloaded = Math.max(0, unloaded - rand(4, 22));
+      steps.push([t, unloaded]);
+      t += rand(150, 1100);
+    }
+    start += rand(2000, 4000);
+
+    var img = document.createElement('img');
+    img.className = 'flip';
+    img.src = 'img/flip/' + gif[0];
+    img.width = w;
+    img.height = h;
+    img.alt = '';
+    img.style.display = 'none';
+    document.body.appendChild(img);
+    return { img: img, x: best[0], y: best[1], w: w, h: h, steps: steps, shown: null };
+  });
+
+  function placeGifs(x0, y0) {
+    var elapsed = Date.now() - t0;
+    gifs.forEach(function (g) {
+      var unloaded = 100;
+      for (var k = 0; k < g.steps.length && g.steps[k][0] <= elapsed; k++) unloaded = g.steps[k][1];
+      var dx = g.x - x0, dy = g.y - y0;
+      if (dx + g.w < 0) dx += SW;
+      if (dy + g.h < 0) dy += SH;
+      var state = [unloaded, dx, dy].join();
+      if (state === g.shown) return;
+      g.shown = state;
+      g.img.style.display = unloaded < 100 ? '' : 'none';
+      g.img.style.left = dx + 'px';
+      g.img.style.top = dy + 'px';
+      g.img.style.clipPath = unloaded ? 'inset(0 0 ' + unloaded + '% 0)' : 'none';
+      g.img.style.outlineStyle = unloaded ? 'solid' : 'none';
+    });
+  }
+
+  var canvas = document.getElementById('c');
+  var g = canvas.getContext('2d');
+  var lastKey = '';
+
+  function tick() {
+    var f = Math.floor(Date.now() / FRAME_MS) % FRAMES;
+
+    var border = (outerWidth - innerWidth) / 2;
+    var ox = screenX - s.availLeft + border;
+    var oy = screenY - s.availTop + (outerHeight - innerHeight) - border;
+    var dpr = devicePixelRatio || 1;
+
+    var x0 = ((ox % SW) + SW) % SW, y0 = ((oy % SH) + SH) % SH;
+    placeGifs(x0, y0);
+
+    var key = [f, ox, oy, innerWidth, innerHeight, dpr].join();
+    if (key !== lastKey) {
+      lastKey = key;
+      var cw = Math.round(innerWidth * dpr), ch = Math.round(innerHeight * dpr);
+      if (canvas.width !== cw || canvas.height !== ch) {
+        canvas.width = cw;
+        canvas.height = ch;
+      }
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.imageSmoothingEnabled = false;
+      for (var tx = -x0; tx < innerWidth; tx += SW)
+        for (var ty = -y0; ty < innerHeight; ty += SH)
+          g.drawImage(frames[f], tx, ty, SW, SH);
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  function tell(msg) {
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(msg, location.origin);
+      return true;
+    }
+    return false;
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') tell('stop');
+  });
+
+  document.getElementById('x').addEventListener('click', function () {
+    if (!tell('close')) window.close();
+  });
+
+  window.addEventListener('pagehide', function () { tell('close'); });
+</script>
+</body>
+</html>

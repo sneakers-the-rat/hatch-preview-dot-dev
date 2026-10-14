@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hatch preview where you put hatch previews instead of leaking a bunch of prod credential cookies or whatever</title>
+  <meta name="description" content="still waiting.">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="hatch preview dot dev">
+  <meta property="og:title" content="hatch preview where you put hatch previews instead of leaking a bunch of prod credential cookies or whateve">
+  <meta property="og:description" content="meta i will sell you this domain the bidding starts at one million dollars ha ha">
+  <meta property="og:url" content="https://hatch-preview.dev">
+  <meta property="og:image" content="https://hatch-preview.dev/img/card.png">
+  <meta property="og:image:width" content="708">
+  <meta property="og:image:height" content="371">
+  <meta property="og:image:alt" content="meta call me bidge we can make a deal
+  /**
+ * CSP wildcard for our Vercel preview deployments.
+ *
+ * Today preview deploys are served as subdomains of `hatch.ecto1.ai`, which
+ * means they're already covered by the broader `*.ecto1.ai` entry below.
+ * The duplicate entry here is intentional: it documents that previews are
+ * a distinct trust principal, and it gives us a single line to swap when we
+ * move them to a registration-isolated apex (see below).
+ *
+ * Why we'll want to move: a `*.preview.hatch.ecto1.ai` host shares an
+ * eTLD+1 with prod (`hatch.ecto1.ai`), so attacks that piggyback on
+ * same-site cookies, document.domain, or `*.ecto1.ai`-scoped CSP entries
+ * become possible against prod from any compromised preview. Concretely:
+ * an attacker who compromises a contributor's GitHub account can push a
+ * malicious branch, Vercel auto-deploys it to `<pr>.preview.hatch.ecto1.ai`,
+ * and that page now sits inside the same site as prod with permission to
+ * iframe / postMessage / read same-site cookies — enough to lift access
+ * tokens out of Spaces or the chat UI. Buying a separate apex (e.g.
+ * `hatch-preview.dev`) and pointing previews there eliminates the
+ * same-site relationship and contains the blast radius to the preview
+ * domain itself.
+ */
+export const HATCH_PREVIEW_DEPLOY_HOST_PATTERN = &quot*.preview.hatch.ecto1.ai&quot;">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="hatch preview where you put hatch previews instead of leaking a bunch of prod credential cookies or whateve">
+  <meta name="twitter:description" content="meta i will sell you this domain the bidding starts at one million dollars ha ha">
+  <meta name="twitter:image" content="https://hatch-preview.dev/img/card.png">
+  <meta name="twitter:image:alt" content="meta call me bidge we can make a deal
+  /**
+ * CSP wildcard for our Vercel preview deployments.
+ *
+ * Today preview deploys are served as subdomains of `hatch.ecto1.ai`, which
+ * means they're already covered by the broader `*.ecto1.ai` entry below.
+ * The duplicate entry here is intentional: it documents that previews are
+ * a distinct trust principal, and it gives us a single line to swap when we
+ * move them to a registration-isolated apex (see below).
+ *
+ * Why we'll want to move: a `*.preview.hatch.ecto1.ai` host shares an
+ * eTLD+1 with prod (`hatch.ecto1.ai`), so attacks that piggyback on
+ * same-site cookies, document.domain, or `*.ecto1.ai`-scoped CSP entries
+ * become possible against prod from any compromised preview. Concretely:
+ * an attacker who compromises a contributor's GitHub account can push a
+ * malicious branch, Vercel auto-deploys it to `<pr>.preview.hatch.ecto1.ai`,
+ * and that page now sits inside the same site as prod with permission to
+ * iframe / postMessage / read same-site cookies — enough to lift access
+ * tokens out of Spaces or the chat UI. Buying a separate apex (e.g.
+ * `hatch-preview.dev`) and pointing previews there eliminates the
+ * same-site relationship and contains the blast radius to the preview
+ * domain itself.
+ */
+export const HATCH_PREVIEW_DEPLOY_HOST_PATTERN = &quot*.preview.hatch.ecto1.ai&quot;">
+
+  <link rel="canonical" href="https://hatch-preview.dev">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <h2>meta i can be reasonable we can strike a deal if you want to preview your hatches just pay me one million dollars</h2>
+
+  <a class="enter" href="#">Enter</a>
+
+  <img class="devnull" src="img/this-comment-could-have-been-a-dev-null.png" width="708" height="538" alt="/**
+ * CSP wildcard for our Vercel preview deployments.
+ *
+ * Today preview deploys are served as subdomains of `hatch.ecto1.ai`, which
+ * means they're already covered by the broader `*.ecto1.ai` entry below.
+ * The duplicate entry here is intentional: it documents that previews are
+ * a distinct trust principal, and it gives us a single line to swap when we
+ * move them to a registration-isolated apex (see below).
+ *
+ * Why we'll want to move: a `*.preview.hatch.ecto1.ai` host shares an
+ * eTLD+1 with prod (`hatch.ecto1.ai`), so attacks that piggyback on
+ * same-site cookies, document.domain, or `*.ecto1.ai`-scoped CSP entries
+ * become possible against prod from any compromised preview. Concretely:
+ * an attacker who compromises a contributor's GitHub account can push a
+ * malicious branch, Vercel auto-deploys it to `<pr>.preview.hatch.ecto1.ai`,
+ * and that page now sits inside the same site as prod with permission to
+ * iframe / postMessage / read same-site cookies — enough to lift access
+ * tokens out of Spaces or the chat UI. Buying a separate apex (e.g.
+ * `hatch-preview.dev`) and pointing previews there eliminates the
+ * same-site relationship and contains the blast radius to the preview
+ * domain itself.
+ */
+export const HATCH_PREVIEW_DEPLOY_HOST_PATTERN = &quot*.preview.hatch.ecto1.ai&quot;">
+
+  <hr>
+
+  <p class="best">Only perceivable at 600x800 pix.</p>
+
+  <small>you are the 666th soul to wander here</small>
+
+  <p id="blocked" hidden><small>allow popups you coward!</small></p>
+
+  <script src="popup.js"></script>
+
+</body>
+</html>
